@@ -11,28 +11,29 @@
         <van-icon name="revoke" size="20"/>
       </template>
     </nav-bar>
-<van-form @submit="onSubmit" style="margin-top:1rem;">
-  <van-field
-    v-model="username"
-    name="username"
-    label="用户名"
-    placeholder="用户名"
-    style="height:1rem"
-    :rules="[{ required: true, message: '请填写用户名' }]"
-  />
-  <van-field
-    v-model="password"
-    type="password"
-    name="password"
-    label="密码"
-    placeholder="密码"
-    :rules="[{ required: true, message: '请填写密码' }]"
-  />
-  <div style="margin: 16px;">
-    <van-button round block type="info" native-type="submit">提交</van-button>
-  </div>
-</van-form>
-  </div>
+
+    <van-form @submit="onSubmit" style="margin-top:1rem;">
+      <van-field
+        v-model="username"
+        name="username"
+        label="用户名"
+        placeholder="用户名"
+        style="height:1rem"
+        :rules="[{ required: true, message: '请填写用户名' }]"
+      />
+      <van-field
+        v-model="password"
+        type="password"
+        name="password"
+        label="密码"
+        placeholder="密码"
+        :rules="[{ required: true, message: '请填写密码' }]"
+      />
+      <div style="margin: 16px;">
+        <van-button round block type="info" native-type="submit">提交</van-button>
+      </div>
+    </van-form>
+</div>
 </template>
 
 <script>
@@ -49,8 +50,9 @@ export default {
     },
   methods: { 
     onSubmit(values) {
-     this.$store.dispatch('user/login', values).then(() => {
-       console.log(this.$store.getters.username)
+     this.$store.dispatch('user/login', values).then((res) => {
+       console.log(res)
+       console.log("login")
             this.$router.push({ path:'/mine' })
           }).catch((err) => {
             console.log(err)

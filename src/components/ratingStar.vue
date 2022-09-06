@@ -38,12 +38,11 @@
     }
 </script>
 
-<style lang="scss" scoped>
-    @import '../style/mixin';
+<style lang="less" scoped>
+    @import '~@/style/mixin';
 	.rating_container{
         position: relative;
-        // top: .2rem;
-        @include wh(1rem, .4rem);
+        .wh(1rem, .4rem);
         .star_overflow{
             overflow: hidden;
             position: relative;

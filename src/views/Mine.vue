@@ -3,21 +3,21 @@
     <!-- 个人信息区域 -->
     <div class="top">
       <div class="msg">
-        <van-img @click="$router.push('/info')" :src="userInfo.avatar" round style="width:2rem;height:2rem" />
-        <h3>{{userInfo.username}}</h3>
+        <van-img @click="$router.push('/info')" :src="this.Info.avatar" round style="width:2rem;height:2rem" />
+        <h3>{{this.Info.username}}</h3>
       </div>
     </div>
     <!-- 收藏区域 -->
     <van-grid :column-num="3">
-      <van-grid-item icon="star-o" text="收藏店铺" />
-      <van-grid-item icon="clock-o" text="历史订单" />
-      <van-grid-item icon="orders-o" text="账单" />
+      <van-grid-item icon="star-o" @click="$router.push('/collect')" text="收藏店铺" />
+      <van-grid-item icon="clock-o" @click="$router.push('/orderlists')" text="历史订单" />
+      <van-grid-item icon="orders-o" @click="getlogin" text="账单" />
     </van-grid>
     <!-- 信息区域 -->
     <van-cell-group>
       <van-cell title="消息通知" is-link />
       <van-cell title="用户反馈" is-link />
-      <van-cell title="小智同学" is-link />
+      <van-cell title="关于我"  @click="$router.push('/about')" is-link />
     </van-cell-group>
     <van-button type="danger" @click="logout" block>注销</van-button>
   </div>
@@ -25,11 +25,13 @@
 
 <script>
 import { Grid, GridItem, Cell, CellGroup,Image, Button } from 'vant';
+import { mapState } from 'vuex'; 
+
 export default {
      data() {
     return {
       checked: true,
-      userInfo:{}
+      Info:{}
     };
   },
     components: {
@@ -38,35 +40,42 @@ export default {
     created(){
       this.getUserindex()
     },
+     computed: {
+		...mapState({islogin: state => state.user.islogin,userinfo: state => state.user.userinfo,token: state => state.user.token})
+	},
+  //  watch:{
+  //     islogin(newValue, oldValue){
+  //       if(newValue){
+  //          this.getUserindex()
+  //          console.log("登陆过期，请重新登陆")
+  //       }
+  //   },
+    // deep: true
+    // },
     methods:{
       getUserindex() {
-       if(this.$store.getters.token)
+        console.log("123")
+       if(this.islogin=="false")
        {
-         this.userInfo.username=this.$store.getters.username
-         this.userInfo.avatar=this.$store.getters.avatar
-         console.log(this.$store.getters.username)
+        this.$router.push({ path:'/login' })
        }
        else{
-         console.log("123")
-         this.$router.push({ path:'/login' })
+        this.Info=this.userinfo
        }
       },
       logout(){
           this.$store.dispatch('user/logout').then(() => {
-            console.log(this.$store.getters.token)
             this.$router.push({ path:'/login' })
           }).catch((err) => {
-            console.log(err)
+            console.log(登出错误)
           
           })
       },
-      onClickEditAddress(){},
-      onSubmit(){}
   }
 }
 </script>
 
-<style lang="scss">
+<style lang="less" scoped>
 
 .my{
 

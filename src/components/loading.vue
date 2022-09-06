@@ -27,8 +27,8 @@
     }
 </script>
 
-<style lang="scss" scoped>
-    @import '../style/mixin';
+<style lang="less" scoped>
+    @import '~@/style/mixin';
 	@keyframes load{
 		0%   {transform: translateY(0px);}
 		50%  {transform: translateY(-50px);}
@@ -44,10 +44,10 @@
     	top: 50%;
     	left: 50%;
     	transform: translate(-50%, -50%);
-    	@include wh(1rem,1rem);
+    	.wh(1rem,1rem);
     }
     .load_img{
-    	@include wh(100%, 100%);
+    	.wh(100%, 100%);
     	background: url(../assets/images/icon_loading.png) no-repeat 0 0;
     	background-size: 1rem auto;
     	transform: translateY(0px);
@@ -57,7 +57,7 @@
     }
 	.load_ellipse{
 		position: absolute;
-		@include wh(1rem, 0.8rem);
+		.wh(1rem, 0.8rem);
 		top: 1rem;
         left: 0.08rem;
 		z-index: 10;

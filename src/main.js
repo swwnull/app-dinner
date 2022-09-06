@@ -2,18 +2,14 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import { Lazyload } from 'vant'
 import '@/config/rem'
-import { Lazyload } from 'vant';
+import '@/style/common.less'
+
+var _ = require('lodash')
 
 Vue.config.productionTip = false
 if(process.env.NODE_ENV == 'development') require('@/api/mock')
-
-//1/一般测试或者是开发环境下导入
-// import Vant from 'vant';
-// import 'vant/lib/index.css';
-// Vue.use(Vant);
-
-//2/按需导入
 
 
 new Vue({
@@ -27,10 +23,11 @@ Vue.use(Lazyload, {
 });
 
 router.beforeEach((to, from, next) => {
-  if(store.getters.token&&to.path === '/login'){
-    console.log(store.getters.username)
+  if(to.path === '/login'&&store.getters.token){
+    console.log(store.getters.userinfo)
       next("mine")
-  }else{
-      next();
   }
+  else{
+    next();
+}
 })

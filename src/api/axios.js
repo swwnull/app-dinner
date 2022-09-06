@@ -15,7 +15,7 @@ class HttpRequest{
         const config = {
             baseURL:this.baseUrl,
             header:{
-                //
+                // 'content-type': 'application/json',
             }
         }
         return config
@@ -28,46 +28,35 @@ class HttpRequest{
           if (store.getters.token) {
             config.headers['X-Token'] = getToken()
           }
-          console.log(store.getters.token)
           return config
         },
         error => {
           // do something with request error
           // for debug
+          
           return Promise.reject(error)
         }
       )
 
 instance.interceptors.response.use(
-
   response => {
     const res = response.data
-    console.log(response)
     if (response.status !== 200) {
-      Message({
-        message: response.message || 'Error',
-        type: 'error',
-        duration: 2 * 1000
-      })
-
+      alert(response.message || 'Error')
+      
       router.push('/login')
       return Promise.reject(new Error(config.message || 'Error'))
     } else {
-      if(window.location.pathname=="/login"){
+      if(window.location.hash=="#/login"){
         checkAuth(res)
       }
-      console.log(res)
       return res
     }
   },
   error => {
     console.log("这是错误："+error)
     console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 2 * 1000
-    })
+    alert(error.message)
     return Promise.reject(error)
   }
 )
@@ -82,17 +71,11 @@ instance.interceptors.response.use(
 }
 function checkAuth(res){
   if(res.error == 'JWT校验失败'){
-    Message({
-      message: '请重新登陆',
-      type: 'error',
-      duration: 2 * 1000
-    })
+    alert('请重新登陆')
     router.push('/login')
   }else if(res.token){
     setToken(res.token)
-    console.log("成功")
   }
-  console.log("aaaa"+res)
   return res
 }
 

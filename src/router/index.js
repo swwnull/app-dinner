@@ -8,42 +8,90 @@ Vue.use(VueRouter)
   {
     path: '/',
     name: 'Home',
-    component: () => import(/* webpackChunkName: "about" */ '@/views/Home.vue')
+    component: () => import('@/views/Home.vue'),
+    meta: {
+      keepAlive: true // 不需要缓存
+    }
   },
   {
-    path: '/goodlists/:id',
-    name: 'Goodlists',
-    component: () => import(/* webpackChunkName: "about" */ '@/views/Goodlists.vue')
+    path: '/goodlists',
+    name: 'goodlists',
+    component: () => import('@/views/Goodlists.vue'),
+    meta: {
+      keepAlive: true // 不需要缓存
+    }
   },
   {
-    path: '/orders',
-    name: 'Orders',
-    component: () => import(/* webpackChunkName: "about" */ '@/views/Orders.vue')
+    path: '/car',
+    name: 'Car',
+    component: () => import('@/views/Car.vue'),
+    meta: {
+      keepAlive: false // 需要被缓存
+    }
   },
   {
     path: '/mine',
     name: 'Mine',
-    meta : {                      //加一个自定义obj
-      requireAuth:true      //这个参数 true 代表需要登录才能进入A
-  },
-    component: () => import(/* webpackChunkName: "about" */ '@/views/Mine.vue')
+    component: () => import( '@/views/Mine.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import(/* webpackChunkName: "about" */ '@/views/Login.vue')
+    component: () => import('@/views/Login.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
   },
+  {
+    path: '/orderlists',
+    name: 'Orderlists',
+    component: () => import( '@/views/Orderlists.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
+  },
+  {
+    path: '/map',
+    name: 'Map',
+    component: () => import('@/components/Map.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
+  },  
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import('@/views/About.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
+  },  
+  {
+    path: '/collect',
+    name: 'collect',
+    component: () => import('@/views/Collect.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
+  },
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('@/views/Search.vue'),
+    meta: {
+      keepAlive: false // 不需要缓存
+    }
+  },    
 ]
 
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
 })
-const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location, onResolve, onReject) {
-	if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
-	return originalPush.call(this, location).catch(err => err)
-}
+
 export default router

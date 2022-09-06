@@ -1,102 +1,163 @@
-const path = require('path');
-const CompressionWebpackPlugin = require("compression-webpack-plugin"); // 开启gzip压缩， 按需引用
-const productionGzipExtensions = /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i; // 开启gzip压缩， 按需写入
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin; // 打包分析
-const IS_PROD = ['production', 'prod'].includes(process.env.NODE_ENV);
-const resolve = (dir) => path.join(__dirname, dir);
+const path = require('path')
+const resolve = (dir) => path.join(__dirname, '.', dir);
+
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/site/vue-demo/' : '/', // 公共路径
-  indexPath: 'index.html' , // 相对于打包路径index.html的路径
-  outputDir: process.env.outputDir || 'dist', // 'dist', 生产环境构建文件的目录
-  assetsDir: 'static', // 相对于outputDir的静态资源(js、css、img、fonts)目录
-  lintOnSave: false, // 是否在开发环境下通过 eslint-loader 在每次保存时 lint 代码
-  runtimeCompiler: true, // 是否使用包含运行时编译器的 Vue 构建版本
-  productionSourceMap: !IS_PROD, // 生产环境的 source map
-  parallel: require("os").cpus().length > 1, // 是否为 Babel 或 TypeScript 使用 thread-loader。该选项在系统的 CPU 有多于一个内核时自动启用，仅作用于生产构建。
-  pwa: {}, // 向 PWA 插件传递选项。
-  chainWebpack: config => {
-    config.resolve.symlinks(true); // 修复热更新失效
-    // 如果使用多页面打包，使用vue inspect --plugins查看html是否在结果数组中
-    config.plugin("html").tap(args => {
-      // 修复 Lazy loading routes Error
-      args[0].chunksSortMode = "none";
-      return args;
+  // 部署应用包时的基本 URL
+  publicPath: process.env.NODE_ENV === 'production'
+  ? './'
+  : '/',
+  productionSourceMap: false,
+  outputDir: 'dist',
+  assetsDir: 'assets',
+  // 指定生成的 index.html 的输出路径 (相对于 outputDir),也可以是一个绝对路径
+  indexPath: 'index.html',
+  // 生成的静态资源在它们的文件名中包含了 hash 以便更好的控制缓存
+  filenameHashing: true,
+  // eslint-loader 是否在保存的时候检查
+  lintOnSave: true,
+  // 是否使用包含运行时编译器的Vue核心的构建
+  runtimeCompiler: false,
+  // 默认情况下 babel-loader 忽略其中的所有文件 node_modules，
+  // 想要通过 Babel 显式转译一个依赖，可以在这个选项中列出来
+  transpileDependencies: [],
+  // 生产环境 sourceMap
+  productionSourceMap: false,
+  // 跨域设置 
+  // 可取值参考： https://developer.mozilla.org/zh-CN/docs/Web/HTML/CORS_settings_attributes
+  crossorigin: undefined,
+  // webpack 配置，键值对象时会合并配置，为方法时会改写配置
+  // https://cli.vuejs.org/guide/webpack.html#simple-configuration
+
+  configureWebpack: (config) => {
+    if (process.env.NODE_ENV === 'production') {
+        // 为生产环境修改配置...
+        config.mode = 'production'
+    } else {
+        // 为开发环境修改配置...
+        config.mode = 'development'
+    }
+    config.externals= {
+      'vue': 'Vue',
+      'vue-router':'VueRouter',
+      'axios': 'axios'
+   }
+},
+
+css: {
+  extract: true,
+  sourceMap: false,
+  loaderOptions: {
+    // 定义全局scss无需引入即可使用
+    less: {
+      prependData: `
+        @import "@/style/common.less";
+        @import "@/style/mixin.less";
+      `
+    }
+  },
+},
+  // webpack 链接 API，用于生成和修改 webapck 配置
+  // https://github.com/mozilla-neutrino/webpack-chain
+  chainWebpack: (config) => {
+    const types = ['vue-modules', 'vue', 'normal-modules', 'normal'];
+    types.forEach(type => {
+        let rule = config.module.rule('less').oneOf(type)
+        rule.use('style-resource')
+            .loader('style-resources-loader')
+            .options({
+                patterns: [path.resolve(__dirname, '@/style/common.less')]
+            });
     });
-    config.resolve.alias // 添加别名
-      .set('@', resolve('src'))
-      .set('@assets', resolve('src/assets'))
-      .set('@components', resolve('src/components'))
-      .set('@views', resolve('src/views'))
-      .set('@store', resolve('src/store'));
-    // 压缩图片
-    // 需要 npm i -D image-webpack-loader
-    config.module
-      .rule("images")
-      .use("image-webpack-loader")
-      .loader("image-webpack-loader")
-      .options({
-        mozjpeg: { progressive: true, quality: 65 },
-        optipng: { enabled: false },
-        pngquant: { quality: [0.65, 0.9], speed: 4 },
-        gifsicle: { interlaced: false },
-        webp: { quality: 75 }
-      });
-    // 打包分析, 打包之后自动生成一个名叫report.html文件(可忽视)
-    if (IS_PROD) {
-      config.plugin("webpack-report").use(BundleAnalyzerPlugin, [
-        {
-          analyzerMode: "static"
-        }
-      ]);
-    }
-  },
-  configureWebpack: config => {
-    // 开启 gzip 压缩
-    const plugins = [];
-    if (IS_PROD) {
-      plugins.push(
-        new CompressionWebpackPlugin({
-          filename: "[path].gz[query]",
-          algorithm: "gzip",
-          test: productionGzipExtensions,
-          threshold: 10240,
-          minRatio: 0.8
-        })
-      );
-    }
-    config.plugins = [...config.plugins, ...plugins];
-  },
-  css: {
-    extract: IS_PROD,
-    requireModuleExtension: true,// 去掉文件名中的 .module
-    loaderOptions: {
-        // 给 less-loader 传递 Less.js 相关选项
-        less: {
-          // `globalVars` 定义全局对象，可加入全局变量
-          globalVars: {
-            primary: '#333'
-          }
-        }
-    }
-  },
-  devServer: {
-      overlay: { // 让浏览器 overlay 同时显示警告和错误
-       warnings: true,
-       errors: true
-      },
-      host: "localhost",
-      port: 8080, // 端口号
-      https: false, // https:{type:Boolean}
-      open: false, //配置自动启动浏览器
-      hotOnly: true, // 热更新
-      // proxy: 'http://localhost:8080'  // 配置跨域处理,只有一个代理
-      proxy:{
-        '/api':{
-            target:"http://localhost:8080",
-            pathRewrite:{
-                '^/api':""
+
+    config.resolve.alias
+    .set('@', resolve('src'))
+    .set('assets', resolve('src/assets'))
+    .set('components', resolve('src/components'))
+    .set('router', resolve('src/router'))
+    .set('store', resolve('src/store'))
+    .set('views', resolve('src/views'))
+
+    config.module.rule('images').use('url-loader')
+        .tap(options => ({
+            name: './assets/images/[name].[ext]',
+            quality: 85,
+            limit: 0,
+            esModule: false,
+        }));
+
+    config.module.rule('svg')
+        .use('svg-sprite-loader')
+        .loader('svg-sprite-loader')
+        .options({
+            symbolId: 'icon-[name]'
+          })
+    config.plugin('define').tap(args => [{
+        ...args, 
+        "window.isDefine": JSON.stringify(true)
+    }]);
+
+    // 生产环境配置
+    if (process.env.NODE_ENV === 'production') {
+        config.output.filename('./js/[name].[chunkhash:8].js');
+        config.output.chunkFilename('./js/[name].[chunkhash:8].js');
+        config.plugin('extract-css').tap(args => [{
+            filename: './css/[name].[contenthash:8].css',
+            chunkFilename: './css/[name].[contenthash:8].css'
+        }]);
+
+        config.optimization.minimize(true)
+            .minimizer('terser')
+            .tap(args => {
+                let { terserOptions } = args[0];
+                terserOptions.compress.drop_console = true;
+                terserOptions.compress.drop_debugger = true;
+                return args
+            });
+        config.optimization.splitChunks({
+            cacheGroups: {
+                common: {
+                    name: 'common',
+                    chunks: 'all',
+                    minSize: 1,
+                    minChunks: 2,
+                    priority: 1
+                },
+                vendor: {
+                    name: 'chunk-libs',
+                    chunks: 'all',
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: 10
+                }
             }
-        }
+        });
     }
-    }
+},
+
+  // 配置高于chainWebpack中关于 css loader 的配置
+  
+
+  // 所有 webpack-dev-server 的选项都支持
+  // https://webpack.js.org/configuration/dev-server/
+  devServer: {
+    open: true,
+    port: 8080,
+    https: false,
+    hotOnly: false,
+    proxy:{
+        '/api':{
+            target:"localhost",
+            pathRewrite:{
+                '^/api':"/api"
+            }
+  },
+},
+  },
+  // 构建时开启多进程处理 babel 编译
+  // 是否为 Babel 或 TypeScript 使用 thread-loader
+
+  // https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-pwa
+  pwa: {},
+
+  // 第三方插件配置
+  pluginOptions: {}
 }

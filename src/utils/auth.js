@@ -1,31 +1,48 @@
-import Cookies from 'js-cookie'
-
 const TokenKey = 'jwttoken'//token秘钥
-const Username = ""
-const Avatar = ""
+const Userinfo = 'Userinfo'
+const Orderlist = 'Orderlist'
+const Islogin = 'Islogin'
 
 
 export function getToken() {
-  return Cookies.get(TokenKey)
+  return localStorage.getItem(TokenKey)
 }
 
 export function setToken(token) {
-  return Cookies.set(TokenKey, token)
+  return localStorage.setItem(TokenKey, token)
+}
+
+export function removeAll() {
+  return localStorage.clear()
 }
 
 export function removeToken() {
-  return Cookies.remove(TokenKey)
+  return localStorage.removeItem(TokenKey)
 }
 
-export function getUsername() {
-  return Cookies.get(Username)
+export function setshoplists(data) {
+  return localStorage.setItem(Orderlist,JSON.stringify(data))
 }
-export function setUsername(username) {
-  return Cookies.set(Username,username)
+
+export function getshoplists() {
+  let list =JSON.parse(localStorage.getItem('Orderlist'))
+  return list
 }
-export function getAvatar() {
-  return Cookies.get(Avatar)
+// export function setUsername(username) {
+//   return Cookies.set(Username,username)
+// }
+
+export function getUserinfo() {
+  let uinfo =JSON.parse(localStorage.getItem('Userinfo'))
+  return uinfo
 }
-export function setAvatar(avatar) {
-  return Cookies.set(Avatar,avatar)
+export function setUserinfo(info) {
+  return localStorage.setItem(Userinfo,JSON.stringify(info))
+}
+
+export function setIslogin(is) {
+  return localStorage.setItem(Islogin,is)
+}
+export function getIslogin() {
+  return localStorage.getItem(Islogin)
 }

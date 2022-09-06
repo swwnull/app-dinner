@@ -4,10 +4,10 @@ const jsonwebtoken = require('jsonwebtoken');
 const userMap ={
       username:'admin',
       password:'123456',
-      id:101
+      id:"u101"
      }
 const userindex ={
-      id:101,
+      id:"u101",
       username: 'Suger',
       code: 0,
       roles: ['admin'],
@@ -24,12 +24,13 @@ const userindex ={
           name:userindex.username
         };
         // 获取jwt的配置信息
-        console.log(res)
-        const {secret,cookie,expire} =jwt
+        const {secret,expire} =jwt
         const token = jsonwebtoken.sign(userInfo,secret,{expiresIn:expire});//签署expire小时期限的token:
         if(userMap.id===userindex.id)
-        {userindex.token=token;
-        return userindex;}
+        {
+          userindex.token=token;
+          return userindex;
+      }
       }
       else{
         return alert("账号密码错误")
